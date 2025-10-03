@@ -1,0 +1,34 @@
+MINECRAFT WII U EXT SAVE FILE STRUCTURE
+
+I have fully reverse engineered this structure into so-what complete understandable ability, can't say fully though since some stuff may be wrong. Those developers online who made MCCToolChest and UMT hide their sources to this, oh oh so bad we can't figure this out! Worry no-more! This structure has been leaked out to public ~hehehe~, nothing can truly, ever go secret.
+
+Description: .ext files for Minecraft Wii U save files are the main header for the world, untouched saves contain the world ID which it connects to the actual world save. The EXT save contains stuff like the world name, seed, texture pack, and other metadata.
+
+Info: If I use the term, `Possible`, it means It may be false or true information, which means this section isn't fully known because pesky developers online keep their source code private.
+
+MAIN-STRUCTURE
+-----------------------
+Hex Analysis and other.
+-----------------------
+
+ENTRY: 0x0 - One byte before world name.
+
+WORLD NAME: 0x1 - Starting point of the world name, in raw binary the world name is in spaces, example: M y  W o r l d, those spaces may be filled with binary or just clear spaces.
+
+Possible Controller Mapping - If shown, 2 bytes after from world name, some saves may not have them, I still do not know what these are, examples of these mappings are, RL_1, Button_B_Animated_CTRL_1.
+
+Possible Data Positioning Headers - A few bytes after the `Controller Mapping`, or `WORLD NAME`, there's just characters of plain binary which could just store either junk data or some data headers, or maybe something that helps the actual game code parse the save file structure. Example of raw binary: fBK™š%Ê  
+Ñ            ?€  ?€  ?€  ?€      B@  B  B¦   ››ÿ›››ÿ›››ÿ›››ÿTTTÿTTTÿTTTÿTTTÿTTTÿTTTÿ   ÿ   ÿ   ÿ3Ù ³ ­  l                     ·.ª.Zˆ    €Õà  
+9ø¬È ?ìÿŽ úÿ÷ÿ0 rÿ`ÿ°þ. (WILL VARY ON DIFFERENT WORLDS, EXAMPLES ARE EXAMPLES, THEY ARE NOT THE SAME).
+
+Texture Pack Header - Sometimes this comes first before the `Data Positioning Headers`. Worlds that used external texture packs will be shown a few bytes after the `Possible Controller Mapping`, or `WORLD NAME`, or sometimes `Data Positioning Headers`. An example of the raw binary: K t e x t u r e P a c k C o m p a r i s o n 0 0 0 0 0 4 0 f . Also close to the PNG header, there will be a file path that reads what texture pack is used, this can differ if it is from a DLC or not, example of raw binary: K/vol/content/WiiU/DLC/The Incredibles Skin Pack/. Though I'm not sure if this appears in the games `romfs`, it might be something relating to code data, eshop purchases (if DLC), backend system, or SDK.
+
+WORLD THUMBNAIL (PNG Header) - This appears straight after either the `Data Positioning Headers`, or the `Texture Pack Header`. It just appears as a regular readable PNG, starts with the basic header %PNG and contains other headers like IHDR, sRGB, IDAT, IEND. The world thumbnail will take over much of the actual save file, but if wanted to, can be extracted by creating a simple tool that looks for a PNG Header and file and extracts it. Another thing, the `World Metadata` section, is actually also embedded inside of the PNG, because before the end of the PNG we can see the metadata, and the reason its near the end of the PNG is because the PNG `IEND` header hasn't been called yet.
+
+World Metadata - This is actually embedded inside of the PNG file, there will be a noticeable entry header that I like to call the `ByteExtension`. which the structure of it is here: {Random Character}tEXt. I don't know the reason of the random character, I checked through 17 ext files and each one had a random character, the most common ones would probably be btEXt, ytEXt, I also saw one like this {tEXt. I still don't know what this is, maybe its just tEXt but I'll be aware myself. Also throughout the metadata, there will be headers I like to call `4JExtension`, they go like this: 4J_{Metadata Option}, the metadata options are, SEED, HOSTOPTIONS, TEXTUREPACK, EXTRADATA, 4J_#LOADS, BASESAVENAME. The Seed option is obvious, world seed, duh, HOSTOPTIONS, the settings that the host of the world has picked, texture pack, what texture pack was saved while ingame, extradata, this is probably some junkdata or some world extension, creative and survival cannot be stored in this save file since they are stored in the main save file, BASESAVENAME, I may have an answer to this one, may be wrong though, So if you have a save for a Tutorial world, I'd understand why this header would appear because in one of my tutorial world saves, right after the header we see this Tutorial.mcs, whatever a .mcs file is, it might be related to the gamerules that are stored inside of the tutorial worlds or other mashup worlds like Mario. #LOADS, I have no idea what this could be, maybe some code directions or something I don't know, most online tools like UMT don't cover these I don't think, they just look for Seed, world name, and world icon :/. Another thing, sometimes right after these metadata options appear a number or ID, here's an example: 88100b8, so what I'm thinking this is, these are what the actual setting id is for the game to see, "oh this is what this ID is, alright let me turn this on, there we go!". So like the SEED header, right after 4J_SEED there is a seed, right after 4J_HOSTOPTIONS there is an ID which can contain numbers and letters, after 4J_TEXTUREPACK, there could be 0 (which means there is no texture pack active), or if there is a texture pack active, it gets an ID which contains numbers and letters, after 4J_EXTRADATA there is also an ID, but after 4J_#LOADS, there is also an ID.
+
+ENDPOINT - Since the world metadata is stored inside of the PNG, right after the last metadata header, the last few binary bytes of the PNG are called as we see the IEND header get shown.
+
+
+So there it is, the full WII U Save world metadata structure. The one that all the developers have been hiding, some stuff may be wrong, but I'm still delving into this to confirm the structure. But the stuff that's actually fully correct is just the things that UMT use for their icon or manifest world labelling, so like the seed, the world thumbnail and the world name. That's really it. Enjoy.
+ 
